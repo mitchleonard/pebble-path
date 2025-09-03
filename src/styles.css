@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-lilac/30 text-slate-900 font-body;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium transition-colors;
+}
+
+.btn-primary {
+  @apply bg-primary text-white shadow-sm hover:bg-indigo-600 active:bg-indigo-700;
+}
+
+.card {
+  @apply rounded-2xl bg-white shadow-sm ring-1 ring-black/5;
+}
+
+.input {
+  @apply w-full rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40;
+}
+
+.section-title {
+  @apply text-sm font-semibold uppercase tracking-wide text-slate-500;
+}
+
+/* Fancy range slider */
+.fancy-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 12px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--color-from, #7C4DFF) 0%, var(--color-from, #7C4DFF) var(--percent, 50%), #e5e7eb var(--percent, 50%), #e5e7eb 100%);
+  outline: none;
+}
+.fancy-range:focus {
+  box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.15);
+}
+.fancy-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid #7C4DFF;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  margin-top: -5px; /* centers the thumb on a ~12px track */
+}
+.fancy-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid #7C4DFF;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.fancy-range::-moz-range-track {
+  height: 12px;
+  border-radius: 9999px;
+  background: #e5e7eb;
+}
+.fancy-range::-moz-range-progress {
+  height: 12px;
+  border-radius: 9999px;
+  background: var(--color-from, #7C4DFF);
+}
+
+/* Playful celebration animation for injection */
+@keyframes emoji-pop {
+  0% { transform: translateY(10px) scale(0.6); opacity: 0; }
+  40% { transform: translateY(-6px) scale(1.05); opacity: 1; }
+  60% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-12px) scale(0.9); opacity: 0; }
+}
+.emoji-pop {
+  animation: emoji-pop 900ms ease-out forwards;
+  font-size: 28px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+}
+
+/* Confetti animation (inspired by Nour Abu Soud pen) */
+.confetti-piece {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+  animation: confetti-burst 700ms ease-out forwards;
+}
+
+@keyframes confetti-burst {
+  0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+  30% { opacity: 1; }
+  80% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(25deg); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.9); opacity: 0; }
+}
+
+/* Hide scrollbars for bar chart scrolling */
+.overflow-x-auto::-webkit-scrollbar,
+.bar-chart-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Bar chart scrolling container */
+.bar-chart-scroll-container {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  cursor: grab;
+}
+
+.bar-chart-scroll-container:active {
+  cursor: grabbing;
+}
+
+/* Custom date input styling to show formatted date */
+input[type="date"] {
+  position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  display: none;
+}
+
+input[type="date"]::before {
+  content: var(--date-display);
+  color: #374151;
+  font-weight: 500;
+}
+
+
