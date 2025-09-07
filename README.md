@@ -3,7 +3,7 @@
 Your daily check-in buddy. A super-light PWA that logs daily health signals and shows quick insights. Designed for GitHub Pages or any static host.
 
 ### Features
-- Daily Home screen: meals/snacks quick-add, water (Stanleys), mood, physical health, workout, weekly weight/injection, notes.
+- Daily Home screen: meals/snacks quick-add, water, mood, physical health, workout, weekly items, and notes.
 - Dashboard: averages, totals, recent list, and export to Excel.
 - Works offline, installs as an app (PWA), instant save via IndexedDB.
 

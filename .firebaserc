@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "production": "pebble-path-app"
+  },
+  "targets": {},
+  "etags": {}
+}
