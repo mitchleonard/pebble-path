@@ -10,6 +10,7 @@ const healthLabels = ['Rough', 'Meh', 'OK', 'Good', 'Great'];
 
 export function Home() {
   const hydrate = useStore((s) => s.hydrate);
+  const isHydrated = useStore((s) => s.isHydrated);
   const days = useStore((s) => s.days);
   const presets = useStore((s) => s.presets);
   const upsertDay = useStore((s) => s.upsertDay);
@@ -34,8 +35,10 @@ export function Home() {
   const [showWeekly, setShowWeekly] = useState<boolean>(isTuesdayOrWednesdayISO(date));
 
   useEffect(() => {
-    hydrate();
-  }, [hydrate]);
+    if (!isHydrated) {
+      hydrate();
+    }
+  }, [hydrate, isHydrated]);
 
   const [mealInputs, setMealInputs] = useState<Record<MealType, string>>({
     breakfast: '',

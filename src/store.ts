@@ -12,7 +12,9 @@ const DEFAULT_PRESETS: Presets = {
 type State = {
   days: Record<string, DayEntry>;
   presets: Presets;
+  isHydrated: boolean;
   hydrate: () => Promise<void>;
+  reset: () => void;
   upsertDay: (entry: DayEntry) => Promise<void>;
   updatePresets: (updater: (p: Presets) => Presets) => Promise<void>;
 };
@@ -21,9 +23,10 @@ export const useStore = create<State>()(
   (set, get) => ({
     days: {},
     presets: DEFAULT_PRESETS,
+    isHydrated: false,
     hydrate: async () => {
       const user = auth.currentUser;
-      if (!user) return;
+      if (!user || get().isHydrated) return;
       
       try {
         const data = await getUserData(user.uid);
@@ -35,11 +38,19 @@ export const useStore = create<State>()(
         }
         set({ 
           days: migrated, 
-          presets: data.presets || DEFAULT_PRESETS 
+          presets: data.presets || DEFAULT_PRESETS,
+          isHydrated: true
         });
       } catch (error) {
         console.error('Error loading user data:', error);
       }
+    },
+    reset: () => {
+      set({ 
+        days: {}, 
+        presets: DEFAULT_PRESETS, 
+        isHydrated: false 
+      });
     },
     upsertDay: async (entry: DayEntry) => {
       const user = auth.currentUser;

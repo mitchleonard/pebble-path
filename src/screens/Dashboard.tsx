@@ -17,6 +17,7 @@ function Insight({ title, value }: { title: string; value: string }) {
 
 export function Dashboard() {
   const hydrate = useStore((s) => s.hydrate);
+  const isHydrated = useStore((s) => s.isHydrated);
   const days = useStore((s) => s.days);
   const upsertDay = useStore((s) => s.upsertDay);
   const presets = useStore((s) => s.presets);
@@ -29,8 +30,10 @@ export function Dashboard() {
   });
 
   useEffect(() => {
-    hydrate();
-  }, [hydrate]);
+    if (!isHydrated) {
+      hydrate();
+    }
+  }, [hydrate, isHydrated]);
 
   const entries: DayEntry[] = useMemo(() => {
     const result: DayEntry[] = [];
