@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Social Preview Solution</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .download-btn {
+            background: #7C4DFF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .download-btn:hover {
+            background: #5B21B6;
+        }
+        .preview-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        /* Full-size preview card for capture */
+        .full-size-card {
+            width: 1200px;
+            height: 630px;
+            background: linear-gradient(135deg, #f3f0ff 0%, #e0e7ff 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 60px 80px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            transform: scale(0.4);
+            transform-origin: top center;
+            margin: 20px 0;
+        }
+        
+        .full-size-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(124, 77, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .content {
+            flex: 1;
+            z-index: 2;
+        }
+        
+        .app-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #7C4DFF 0%, #5B21B6 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(124, 77, 255, 0.3);
+        }
+        
+        .app-icon::after {
+            content: '🪨';
+            font-size: 50px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+        
+        .title {
+            font-size: 64px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 20px 0;
+            line-height: 1.1;
+        }
+        
+        .subtitle {
+            font-size: 28px;
+            color: #7C4DFF;
+            font-weight: 600;
+            margin: 0 0 25px 0;
+        }
+        
+        .description {
+            font-size: 24px;
+            color: #64748b;
+            line-height: 1.4;
+            max-width: 500px;
+        }
+        
+        .visual-elements {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            z-index: 2;
+        }
+        
+        .habit-card {
+            position: absolute;
+            background: white;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .habit-card:nth-child(1) {
+            top: 15px;
+            right: 15px;
+            transform: rotate(5deg);
+        }
+        
+        .habit-card:nth-child(2) {
+            top: 100px;
+            right: 70px;
+            transform: rotate(-3deg);
+        }
+        
+        .habit-card:nth-child(3) {
+            top: 185px;
+            right: 35px;
+            transform: rotate(2deg);
+        }
+        
+        .checkmark {
+            color: #10b981;
+            margin-right: 6px;
+        }
+        
+        .progress-bar {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 180px;
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7C4DFF 0%, #5B21B6 100%);
+            border-radius: 9999px;
+            width: 75%;
+        }
+        
+        .capture-area {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 1200px;
+            height: 630px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="instructions">
+            <h3>📸 Final Solution - Right Click Method</h3>
+            <p><strong>This is the simplest and most reliable method:</strong></p>
+            <ol>
+                <li><strong>Right-click</strong> on the preview card below</li>
+                <li>Select <strong>"Save image as..."</strong> or <strong>"Copy image"</strong></li>
+                <li>Save as <strong>"social-preview.png"</strong></li>
+                <li>Place it in your <strong>public</strong> folder</li>
+                <li>Run <code>npm run build</code> and deploy!</li>
+            </ol>
+            <p><em>The preview card below is exactly 1200x630px, just scaled down to fit your screen.</em></p>
+        </div>
+        
+        <div class="preview-container">
+            <div class="full-size-card" id="previewCard">
+                <div class="content">
+                    <div class="app-icon"></div>
+                    <h1 class="title">Pebble Path</h1>
+                    <p class="subtitle">Your daily check-in buddy</p>
+                    <p class="description">Track your daily habits, set goals, and build lasting routines. Your personal companion for growth and wellness.</p>
+                </div>
+                
+                <div class="visual-elements">
+                    <div class="habit-card">
+                        <span class="checkmark">✓</span>Morning Walk
+                    </div>
+                    <div class="habit-card">
+                        <span class="checkmark">✓</span>Read 10 pages
+                    </div>
+                    <div class="habit-card">
+                        <span class="checkmark">✓</span>Meditate
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <button class="download-btn" onclick="showFullSize()">🔍 Show Full Size</button>
+            <button class="download-btn" onclick="downloadImage()">📥 Try Download (Backup)</button>
+        </div>
+    </div>
+
+    <script>
+        function showFullSize() {
+            const card = document.getElementById('previewCard');
+            card.style.transform = 'scale(1)';
+            card.style.position = 'fixed';
+            card.style.top = '50%';
+            card.style.left = '50%';
+            card.style.transform = 'translate(-50%, -50%) scale(0.8)';
+            card.style.zIndex = '9999';
+            card.style.backgroundColor = 'rgba(0,0,0,0.1)';
+            
+            // Add click to close
+            card.onclick = function() {
+                card.style.transform = 'scale(0.3)';
+                card.style.position = 'relative';
+                card.style.top = 'auto';
+                card.style.left = 'auto';
+                card.style.zIndex = 'auto';
+                card.style.backgroundColor = 'transparent';
+                card.onclick = null;
+            };
+        }
+        
+        function downloadImage() {
+            // Simple fallback - just try html2canvas on the visible element
+            const card = document.getElementById('previewCard');
+            
+            // Temporarily make it full size
+            const originalTransform = card.style.transform;
+            const originalPosition = card.style.position;
+            const originalTop = card.style.top;
+            const originalLeft = card.style.left;
+            const originalZIndex = card.style.zIndex;
+            
+            card.style.transform = 'scale(1)';
+            card.style.position = 'absolute';
+            card.style.top = '-9999px';
+            card.style.left = '-9999px';
+            card.style.zIndex = '1';
+            
+            setTimeout(() => {
+                html2canvas(card, {
+                    width: 1200,
+                    height: 630,
+                    scale: 1,
+                    backgroundColor: null,
+                    useCORS: true,
+                    allowTaint: true
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'social-preview.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    // Restore
+                    card.style.transform = originalTransform;
+                    card.style.position = originalPosition;
+                    card.style.top = originalTop;
+                    card.style.left = originalLeft;
+                    card.style.zIndex = originalZIndex;
+                }).catch(err => {
+                    console.error('Error:', err);
+                    alert('Download failed. Please use the right-click method instead.');
+                    
+                    // Restore
+                    card.style.transform = originalTransform;
+                    card.style.position = originalPosition;
+                    card.style.top = originalTop;
+                    card.style.left = originalLeft;
+                    card.style.zIndex = originalZIndex;
+                });
+            }, 100);
+        }
+    </script>
+    
+    <!-- Include html2canvas library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+</html>

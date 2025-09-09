@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Social Preview Generator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        .download-btn {
+            background: #7C4DFF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .download-btn:hover {
+            background: #5B21B6;
+        }
+        .preview-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .preview-card {
+            width: 600px;
+            height: 315px;
+            background: linear-gradient(135deg, #f3f0ff 0%, #e0e7ff 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .content {
+            flex: 1;
+            z-index: 2;
+        }
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #7C4DFF 0%, #5B21B6 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(124, 77, 255, 0.3);
+        }
+        .app-icon::after {
+            content: '🪨';
+            font-size: 30px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+        .title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 12px 0;
+            line-height: 1.1;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #7C4DFF;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+        }
+        .description {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.4;
+            max-width: 300px;
+        }
+        .visual-elements {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            z-index: 2;
+        }
+        .habit-card {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+            font-size: 9px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .habit-card:nth-child(1) {
+            top: 10px;
+            right: 10px;
+            transform: rotate(5deg);
+        }
+        .habit-card:nth-child(2) {
+            top: 60px;
+            right: 40px;
+            transform: rotate(-3deg);
+        }
+        .habit-card:nth-child(3) {
+            top: 110px;
+            right: 20px;
+            transform: rotate(2deg);
+        }
+        .checkmark {
+            color: #10b981;
+            margin-right: 4px;
+        }
+        .progress-bar {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 100px;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7C4DFF 0%, #5B21B6 100%);
+            border-radius: 9999px;
+            width: 75%;
+        }
+        .decorative-circle {
+            position: absolute;
+            top: -25%;
+            right: -10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(124, 77, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="instructions">
+            <h3>📸 How to Save Your Social Preview Image</h3>
+            <ol>
+                <li><strong>Right-click</strong> on the preview card below</li>
+                <li>Select <strong>"Save image as..."</strong> or <strong>"Copy image"</strong></li>
+                <li>Save as <strong>"social-preview.png"</strong></li>
+                <li>Place it in your <strong>public</strong> folder</li>
+                <li>Run <code>npm run build</code> and deploy!</li>
+            </ol>
+        </div>
+        
+        <div class="preview-container">
+            <div class="preview-card" id="previewCard">
+                <div class="content">
+                    <div class="app-icon"></div>
+                    <h1 class="title">Pebble Path</h1>
+                    <p class="subtitle">Your daily check-in buddy</p>
+                    <p class="description">Track your daily habits, set goals, and build lasting routines. Your personal companion for growth and wellness.</p>
+                </div>
+                
+                <div class="visual-elements">
+                    <div class="habit-card">
+                        <span class="checkmark">✓</span>Morning Walk
+                    </div>
+                    <div class="habit-card">
+                        <span class="checkmark">✓</span>Read 10 pages
+                    </div>
+                    <div class="habit-card">
+                        <span class="checkmark">✓</span>Meditate
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+                
+                <div class="decorative-circle"></div>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <button class="download-btn" onclick="downloadImage()">📥 Download as PNG</button>
+            <button class="download-btn" onclick="copyImage()">📋 Copy Image</button>
+        </div>
+    </div>
+
+    <script>
+        function downloadImage() {
+            const previewCard = document.getElementById('previewCard');
+            
+            // Create a temporary full-size version
+            const tempCard = previewCard.cloneNode(true);
+            tempCard.style.position = 'absolute';
+            tempCard.style.left = '-9999px';
+            tempCard.style.top = '-9999px';
+            tempCard.style.width = '1200px';
+            tempCard.style.height = '630px';
+            tempCard.style.padding = '80px';
+            tempCard.style.transform = 'none';
+            tempCard.style.margin = '0';
+            
+            // Scale up all the content proportionally
+            const content = tempCard.querySelector('.content');
+            content.style.transform = 'scale(2)';
+            content.style.transformOrigin = 'top left';
+            
+            const visualElements = tempCard.querySelector('.visual-elements');
+            visualElements.style.transform = 'scale(2)';
+            visualElements.style.transformOrigin = 'top right';
+            
+            const decorativeCircle = tempCard.querySelector('.decorative-circle');
+            decorativeCircle.style.width = '400px';
+            decorativeCircle.style.height = '400px';
+            decorativeCircle.style.top = '-50%';
+            decorativeCircle.style.right = '-20%';
+            
+            // Scale up text sizes
+            const title = tempCard.querySelector('.title');
+            title.style.fontSize = '72px';
+            
+            const subtitle = tempCard.querySelector('.subtitle');
+            subtitle.style.fontSize = '32px';
+            
+            const description = tempCard.querySelector('.description');
+            description.style.fontSize = '28px';
+            description.style.maxWidth = '600px';
+            
+            // Scale up app icon
+            const appIcon = tempCard.querySelector('.app-icon');
+            appIcon.style.width = '120px';
+            appIcon.style.height = '120px';
+            appIcon.style.borderRadius = '28px';
+            appIcon.querySelector('::after').style.fontSize = '60px';
+            
+            // Scale up habit cards
+            const habitCards = tempCard.querySelectorAll('.habit-card');
+            habitCards.forEach(card => {
+                card.style.fontSize = '18px';
+                card.style.padding = '20px';
+                card.style.borderRadius = '16px';
+            });
+            
+            // Scale up progress bar
+            const progressBar = tempCard.querySelector('.progress-bar');
+            progressBar.style.width = '200px';
+            progressBar.style.height = '12px';
+            
+            document.body.appendChild(tempCard);
+            
+            html2canvas(tempCard, {
+                width: 1200,
+                height: 630,
+                scale: 1,
+                backgroundColor: null,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'social-preview.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                document.body.removeChild(tempCard);
+            }).catch(err => {
+                console.error('Error generating image:', err);
+                alert('Error generating image. Please try the right-click method instead.');
+                document.body.removeChild(tempCard);
+            });
+        }
+        
+        function copyImage() {
+            const previewCard = document.getElementById('previewCard');
+            
+            // Create a temporary full-size version
+            const tempCard = previewCard.cloneNode(true);
+            tempCard.style.position = 'absolute';
+            tempCard.style.left = '-9999px';
+            tempCard.style.top = '-9999px';
+            tempCard.style.width = '1200px';
+            tempCard.style.height = '630px';
+            tempCard.style.padding = '80px';
+            tempCard.style.transform = 'none';
+            tempCard.style.margin = '0';
+            
+            // Scale up all the content proportionally
+            const content = tempCard.querySelector('.content');
+            content.style.transform = 'scale(2)';
+            content.style.transformOrigin = 'top left';
+            
+            const visualElements = tempCard.querySelector('.visual-elements');
+            visualElements.style.transform = 'scale(2)';
+            visualElements.style.transformOrigin = 'top right';
+            
+            const decorativeCircle = tempCard.querySelector('.decorative-circle');
+            decorativeCircle.style.width = '400px';
+            decorativeCircle.style.height = '400px';
+            decorativeCircle.style.top = '-50%';
+            decorativeCircle.style.right = '-20%';
+            
+            // Scale up text sizes
+            const title = tempCard.querySelector('.title');
+            title.style.fontSize = '72px';
+            
+            const subtitle = tempCard.querySelector('.subtitle');
+            subtitle.style.fontSize = '32px';
+            
+            const description = tempCard.querySelector('.description');
+            description.style.fontSize = '28px';
+            description.style.maxWidth = '600px';
+            
+            // Scale up app icon
+            const appIcon = tempCard.querySelector('.app-icon');
+            appIcon.style.width = '120px';
+            appIcon.style.height = '120px';
+            appIcon.style.borderRadius = '28px';
+            
+            // Scale up habit cards
+            const habitCards = tempCard.querySelectorAll('.habit-card');
+            habitCards.forEach(card => {
+                card.style.fontSize = '18px';
+                card.style.padding = '20px';
+                card.style.borderRadius = '16px';
+            });
+            
+            // Scale up progress bar
+            const progressBar = tempCard.querySelector('.progress-bar');
+            progressBar.style.width = '200px';
+            progressBar.style.height = '12px';
+            
+            document.body.appendChild(tempCard);
+            
+            html2canvas(tempCard, {
+                width: 1200,
+                height: 630,
+                scale: 1,
+                backgroundColor: null,
+                useCORS: true
+            }).then(canvas => {
+                canvas.toBlob(blob => {
+                    navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                    ]).then(() => {
+                        alert('Image copied to clipboard! Paste it into an image editor and save as social-preview.png');
+                        document.body.removeChild(tempCard);
+                    }).catch(err => {
+                        console.error('Error copying to clipboard:', err);
+                        alert('Error copying image. Please try the right-click method instead.');
+                        document.body.removeChild(tempCard);
+                    });
+                });
+            }).catch(err => {
+                console.error('Error generating image:', err);
+                alert('Error generating image. Please try the right-click method instead.');
+                document.body.removeChild(tempCard);
+            });
+        }
+    </script>
+    
+    <!-- Include html2canvas library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+</html>

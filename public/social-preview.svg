@@ -1,0 +1,62 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f3f0ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e0e7ff;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C4DFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5B21B6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7C4DFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5B21B6;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="10" stdDeviation="20" flood-color="rgba(0,0,0,0.1)"/>
+    </filter>
+    <filter id="iconShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="20" stdDeviation="40" flood-color="rgba(124,77,255,0.3)"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)" rx="24"/>
+  
+  <!-- Decorative circle -->
+  <circle cx="960" cy="160" r="200" fill="rgba(124,77,255,0.1)"/>
+  
+  <!-- App Icon -->
+  <rect x="80" y="80" width="120" height="120" fill="url(#iconGradient)" rx="28" filter="url(#iconShadow)"/>
+  <text x="140" y="160" text-anchor="middle" font-size="60" fill="white" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.2))">🪨</text>
+  
+  <!-- Title -->
+  <text x="80" y="280" font-family="Inter, sans-serif" font-size="72" font-weight="700" fill="#1e293b">Pebble Path</text>
+  
+  <!-- Subtitle -->
+  <text x="80" y="340" font-family="Inter, sans-serif" font-size="32" font-weight="600" fill="#7C4DFF">Your daily check-in buddy</text>
+  
+  <!-- Description -->
+  <text x="80" y="400" font-family="Inter, sans-serif" font-size="28" fill="#64748b">Track your daily habits, set goals, and build lasting routines.</text>
+  <text x="80" y="440" font-family="Inter, sans-serif" font-size="28" fill="#64748b">Your personal companion for growth and wellness.</text>
+  
+  <!-- Habit Cards -->
+  <g transform="translate(800, 100) rotate(5)">
+    <rect width="180" height="60" fill="white" rx="16" filter="url(#shadow)"/>
+    <text x="20" y="35" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#1e293b">✓ Morning Walk</text>
+  </g>
+  
+  <g transform="translate(860, 220) rotate(-3)">
+    <rect width="180" height="60" fill="white" rx="16" filter="url(#shadow)"/>
+    <text x="20" y="35" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#1e293b">✓ Read 10 pages</text>
+  </g>
+  
+  <g transform="translate(820, 340) rotate(2)">
+    <rect width="180" height="60" fill="white" rx="16" filter="url(#shadow)"/>
+    <text x="20" y="35" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#1e293b">✓ Meditate</text>
+  </g>
+  
+  <!-- Progress Bar -->
+  <rect x="800" y="480" width="200" height="12" fill="#e5e7eb" rx="9999"/>
+  <rect x="800" y="480" width="150" height="12" fill="url(#progressGradient)" rx="9999"/>
+</svg>
