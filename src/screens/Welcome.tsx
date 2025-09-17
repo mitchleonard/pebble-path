@@ -24,6 +24,15 @@ export function Welcome() {
     }
   }, [user]);
 
+  // Cleanup reCAPTCHA on unmount
+  useEffect(() => {
+    return () => {
+      if ((window as any).recaptchaVerifier) {
+        (window as any).recaptchaVerifier.clear();
+      }
+    };
+  }, []);
+
   async function checkUserProfile() {
     if (!user) return;
     
@@ -89,15 +98,24 @@ export function Welcome() {
         formattedPhone = '+1' + formattedPhone.replace(/\D/g, '');
       }
       
-      // Initialize reCAPTCHA
-      let recaptchaVerifier = (window as any).recaptchaVerifier;
-      if (!recaptchaVerifier) {
-        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: () => {},
-        });
-        (window as any).recaptchaVerifier = recaptchaVerifier;
+      // Clean up any existing reCAPTCHA
+      if ((window as any).recaptchaVerifier) {
+        (window as any).recaptchaVerifier.clear();
       }
+      
+      // Initialize reCAPTCHA with visible widget
+      const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'normal',
+        callback: () => {
+          console.log('reCAPTCHA solved');
+        },
+        'expired-callback': () => {
+          console.log('reCAPTCHA expired');
+          setError('reCAPTCHA expired. Please try again.');
+        }
+      });
+      
+      (window as any).recaptchaVerifier = recaptchaVerifier;
       
       const result = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
       setConfirmationResult(result);
@@ -105,10 +123,22 @@ export function Welcome() {
       setShowPhoneInput(false);
     } catch (error: any) {
       console.error('Phone sign-in error:', error);
+      
+      // Clean up reCAPTCHA on error
+      if ((window as any).recaptchaVerifier) {
+        (window as any).recaptchaVerifier.clear();
+      }
+      
       if (error.code === 'auth/invalid-phone-number') {
         setError('Invalid phone number. Please check and try again.');
+      } else if (error.code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please try again later.');
+      } else if (error.code === 'auth/captcha-check-failed') {
+        setError('reCAPTCHA verification failed. Please try again.');
+      } else if (error.code === 'auth/invalid-verification-code') {
+        setError('Invalid verification code. Please try again.');
       } else {
-        setError('Phone sign-in failed. Please try again.');
+        setError(`Phone sign-in failed: ${error.message}`);
       }
     } finally {
       setLoading(false);
@@ -231,7 +261,13 @@ export function Welcome() {
           
           <button
             className="btn bg-lilac/60 hover:bg-lilac w-full"
-            onClick={() => setShowPhoneInput(true)}
+            onClick={() => {
+              // Clean up any existing reCAPTCHA
+              if ((window as any).recaptchaVerifier) {
+                (window as any).recaptchaVerifier.clear();
+              }
+              setShowPhoneInput(true);
+            }}
             disabled={loading}
           >
             Continue with Phone
@@ -267,6 +303,8 @@ export function Welcome() {
                   Cancel
                 </button>
               </div>
+              {/* reCAPTCHA container */}
+              <div id="recaptcha-container" className="mt-3 flex justify-center"></div>
             </div>
           </div>
         )}
