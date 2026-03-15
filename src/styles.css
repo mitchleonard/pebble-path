@@ -86,7 +86,7 @@ body {
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));
 }
 
-/* Confetti animation (inspired by Nour Abu Soud pen) */
+/* Confetti animation */
 .confetti-piece {
   position: absolute;
   width: 6px;
@@ -101,6 +101,33 @@ body {
   30% { opacity: 1; }
   80% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(25deg); opacity: 1; }
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.9); opacity: 0; }
+}
+
+/* Calm animation — soft dots drift upward */
+.calm-piece {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%);
+  animation: calm-float 1200ms ease-out forwards;
+}
+
+@keyframes calm-float {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  20%  { opacity: 0.8; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.6); opacity: 0; }
+}
+
+/* Calm variant — gentle pulse on the checkbox circle */
+.calm-check-pulse {
+  animation: calm-check 600ms ease-out;
+}
+
+@keyframes calm-check {
+  0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+  40%  { transform: scale(1.18); box-shadow: 0 0 0 6px rgba(52, 211, 153, 0.2); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
 }
 
 /* Hide scrollbars for bar chart scrolling */

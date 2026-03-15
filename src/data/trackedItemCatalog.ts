@@ -1,5 +1,6 @@
 export type ItemInputType = 'checkbox' | 'number' | 'slider' | 'text';
 export type ItemCategory = 'vitals' | 'body' | 'medication' | 'symptoms' | 'lifestyle';
+export type AnimationVariant = 'confetti' | 'calm' | 'plain';
 
 export type CatalogItem = {
   id: string;
@@ -12,12 +13,89 @@ export type CatalogItem = {
   min?: number;
   max?: number;
   step?: number;
-  // Default days to prompt (null = every day, number[] = specific days: 0=Sun..6=Sat)
+  // null = every day, number[] = specific days (0=Sun..6=Sat)
   defaultScheduleDays: number[] | null;
+  // For checkbox items: emoji shown on check and animation style
+  checkEmoji?: string;
+  animationVariant?: AnimationVariant;
+  // Maps to a specific DayEntry field instead of customValues
+  specialField?: 'weight' | 'injection';
 };
 
 export const CATALOG_ITEMS: CatalogItem[] = [
-  // --- Vitals ---
+  // ── Body (weight first so it appears prominently) ─────────────────────────
+  {
+    id: 'weight',
+    label: 'Weight',
+    description: 'Body weight check-in',
+    category: 'body',
+    inputType: 'number',
+    icon: '⚖️',
+    unit: 'lbs',
+    min: 50,
+    max: 600,
+    step: 0.1,
+    defaultScheduleDays: [2, 3], // Tue, Wed
+    specialField: 'weight',
+  },
+  // ── Medication ────────────────────────────────────────────────────────────
+  {
+    id: 'injection',
+    label: 'Injection',
+    description: 'Weekly injection / shot',
+    category: 'medication',
+    inputType: 'checkbox',
+    icon: '💉',
+    defaultScheduleDays: [2], // Tuesday
+    checkEmoji: '💉',
+    animationVariant: 'confetti',
+    specialField: 'injection',
+  },
+  {
+    id: 'med_am',
+    label: 'Morning Medication',
+    description: 'Took morning medication',
+    category: 'medication',
+    inputType: 'checkbox',
+    icon: '💊',
+    defaultScheduleDays: null,
+    checkEmoji: '💊',
+    animationVariant: 'confetti',
+  },
+  {
+    id: 'med_pm',
+    label: 'Evening Medication',
+    description: 'Took evening medication',
+    category: 'medication',
+    inputType: 'checkbox',
+    icon: '🌙',
+    defaultScheduleDays: null,
+    checkEmoji: '💊',
+    animationVariant: 'confetti',
+  },
+  {
+    id: 'vitamins',
+    label: 'Vitamins / Supplements',
+    description: 'Took daily vitamins or supplements',
+    category: 'medication',
+    inputType: 'checkbox',
+    icon: '🫙',
+    defaultScheduleDays: null,
+    checkEmoji: '✨',
+    animationVariant: 'confetti',
+  },
+  {
+    id: 'probiotic',
+    label: 'Probiotic',
+    description: 'Took probiotic',
+    category: 'medication',
+    inputType: 'checkbox',
+    icon: '🦠',
+    defaultScheduleDays: null,
+    checkEmoji: '🦠',
+    animationVariant: 'confetti',
+  },
+  // ── Vitals ────────────────────────────────────────────────────────────────
   {
     id: 'heart_rate',
     label: 'Heart Rate',
@@ -80,7 +158,7 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     step: 1,
     defaultScheduleDays: null,
   },
-  // --- Body ---
+  // ── Body ──────────────────────────────────────────────────────────────────
   {
     id: 'sleep_hours',
     label: 'Sleep Hours',
@@ -144,7 +222,7 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     min: 20,
     max: 70,
     step: 0.5,
-    defaultScheduleDays: [3], // Wednesday
+    defaultScheduleDays: [3],
   },
   {
     id: 'body_fat',
@@ -152,51 +230,14 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     description: 'Estimated body fat percentage',
     category: 'body',
     inputType: 'number',
-    icon: '⚖️',
+    icon: '📊',
     unit: '%',
     min: 5,
     max: 60,
     step: 0.5,
-    defaultScheduleDays: [3], // Wednesday
+    defaultScheduleDays: [3],
   },
-  // --- Medication ---
-  {
-    id: 'med_am',
-    label: 'Morning Medication',
-    description: 'Took morning medication',
-    category: 'medication',
-    inputType: 'checkbox',
-    icon: '💊',
-    defaultScheduleDays: null,
-  },
-  {
-    id: 'med_pm',
-    label: 'Evening Medication',
-    description: 'Took evening medication',
-    category: 'medication',
-    inputType: 'checkbox',
-    icon: '🌙',
-    defaultScheduleDays: null,
-  },
-  {
-    id: 'vitamins',
-    label: 'Vitamins / Supplements',
-    description: 'Took daily vitamins or supplements',
-    category: 'medication',
-    inputType: 'checkbox',
-    icon: '🫙',
-    defaultScheduleDays: null,
-  },
-  {
-    id: 'probiotic',
-    label: 'Probiotic',
-    description: 'Took probiotic',
-    category: 'medication',
-    inputType: 'checkbox',
-    icon: '🦠',
-    defaultScheduleDays: null,
-  },
-  // --- Symptoms ---
+  // ── Symptoms ──────────────────────────────────────────────────────────────
   {
     id: 'pain_level',
     label: 'Pain Level',
@@ -208,6 +249,7 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     max: 10,
     step: 1,
     defaultScheduleDays: null,
+    animationVariant: 'plain',
   },
   {
     id: 'energy_level',
@@ -220,6 +262,7 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     max: 5,
     step: 1,
     defaultScheduleDays: null,
+    animationVariant: 'confetti',
   },
   {
     id: 'stress_level',
@@ -232,6 +275,7 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     max: 5,
     step: 1,
     defaultScheduleDays: null,
+    animationVariant: 'plain',
   },
   {
     id: 'headache',
@@ -241,6 +285,8 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     inputType: 'checkbox',
     icon: '🤯',
     defaultScheduleDays: null,
+    checkEmoji: undefined,
+    animationVariant: 'plain',
   },
   {
     id: 'nausea',
@@ -250,6 +296,8 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     inputType: 'checkbox',
     icon: '🤢',
     defaultScheduleDays: null,
+    checkEmoji: undefined,
+    animationVariant: 'plain',
   },
   {
     id: 'bloating',
@@ -262,6 +310,7 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     max: 5,
     step: 1,
     defaultScheduleDays: null,
+    animationVariant: 'plain',
   },
   {
     id: 'skin_condition',
@@ -283,8 +332,10 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     inputType: 'checkbox',
     icon: '🌸',
     defaultScheduleDays: null,
+    checkEmoji: '🌸',
+    animationVariant: 'calm',
   },
-  // --- Lifestyle ---
+  // ── Lifestyle ─────────────────────────────────────────────────────────────
   {
     id: 'alcohol',
     label: 'Alcohol',
@@ -319,6 +370,8 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     inputType: 'checkbox',
     icon: '🧘',
     defaultScheduleDays: null,
+    checkEmoji: '🧘',
+    animationVariant: 'calm',
   },
   {
     id: 'meditation',
@@ -328,6 +381,8 @@ export const CATALOG_ITEMS: CatalogItem[] = [
     inputType: 'checkbox',
     icon: '🕯️',
     defaultScheduleDays: null,
+    checkEmoji: '✨',
+    animationVariant: 'calm',
   },
   {
     id: 'outside_time',
@@ -350,8 +405,14 @@ export const CATALOG_BY_ID: Record<string, CatalogItem> = Object.fromEntries(
 
 export const CATEGORY_LABELS: Record<ItemCategory, string> = {
   vitals: 'Vitals',
-  body: 'Body',
+  body: 'Body Metrics',
   medication: 'Medication',
   symptoms: 'Symptoms',
   lifestyle: 'Lifestyle',
 };
+
+// Items whose subjective/feeling nature belongs in the "How are you feeling?" section
+export const FEELINGS_ITEM_IDS = new Set([
+  'pain_level', 'energy_level', 'stress_level',
+  'headache', 'nausea', 'bloating', 'skin_condition', 'period',
+]);

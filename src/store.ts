@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { DayEntry, Presets, MealType, UserSettings, DEFAULT_USER_SETTINGS } from './types';
+import { DayEntry, Presets, MealType, UserSettings, DEFAULT_USER_SETTINGS, TrackedItemConfig } from './types';
 import { getUserData, saveUserData } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
 
@@ -39,10 +39,13 @@ export const useStore = create<State>()(
             migrated[k] = migrateEntry(v as unknown as DayEntry | any);
           }
         }
+        const rawSettings: UserSettings = data.settings
+          ? { ...DEFAULT_USER_SETTINGS, ...data.settings }
+          : DEFAULT_USER_SETTINGS;
         set({
           days: migrated,
           presets: data.presets || DEFAULT_PRESETS,
-          settings: data.settings ? { ...DEFAULT_USER_SETTINGS, ...data.settings } : DEFAULT_USER_SETTINGS,
+          settings: ensureLegacyItems(rawSettings),
           isHydrated: true
         });
       } catch (error) {
@@ -83,6 +86,18 @@ export const useStore = create<State>()(
     },
   })
 );
+
+// Ensures weight and injection (formerly "weekly items") exist in trackedItems
+// so existing users seamlessly get them on their historical schedule.
+function ensureLegacyItems(s: UserSettings): UserSettings {
+  const hasWeight = s.trackedItems.some((c) => c.id === 'weight');
+  const hasInjection = s.trackedItems.some((c) => c.id === 'injection');
+  if (hasWeight && hasInjection) return s;
+  const additions: TrackedItemConfig[] = [];
+  if (!hasWeight) additions.push({ id: 'weight', isEnabled: true, scheduleDays: [2, 3] }); // Tue, Wed
+  if (!hasInjection) additions.push({ id: 'injection', isEnabled: true, scheduleDays: [2] }); // Tue
+  return { ...s, trackedItems: [...additions, ...s.trackedItems] };
+}
 
 function emptyMeals(): Record<MealType, string[]> {
   return { breakfast: [], lunch: [], dinner: [], snacks: [] };
