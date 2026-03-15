@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { DayEntry, Presets, MealType } from './types';
+import { DayEntry, Presets, MealType, UserSettings, DEFAULT_USER_SETTINGS } from './types';
 import { getUserData, saveUserData } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
 
@@ -12,22 +12,25 @@ const DEFAULT_PRESETS: Presets = {
 type State = {
   days: Record<string, DayEntry>;
   presets: Presets;
+  settings: UserSettings;
   isHydrated: boolean;
   hydrate: () => Promise<void>;
   reset: () => void;
   upsertDay: (entry: DayEntry) => Promise<void>;
   updatePresets: (updater: (p: Presets) => Presets) => Promise<void>;
+  updateSettings: (updater: (s: UserSettings) => UserSettings) => Promise<void>;
 };
 
 export const useStore = create<State>()(
   (set, get) => ({
     days: {},
     presets: DEFAULT_PRESETS,
+    settings: DEFAULT_USER_SETTINGS,
     isHydrated: false,
     hydrate: async () => {
       const user = auth.currentUser;
       if (!user || get().isHydrated) return;
-      
+
       try {
         const data = await getUserData(user.uid);
         const migrated: Record<string, DayEntry> = {};
@@ -36,9 +39,10 @@ export const useStore = create<State>()(
             migrated[k] = migrateEntry(v as unknown as DayEntry | any);
           }
         }
-        set({ 
-          days: migrated, 
+        set({
+          days: migrated,
           presets: data.presets || DEFAULT_PRESETS,
+          settings: data.settings ? { ...DEFAULT_USER_SETTINGS, ...data.settings } : DEFAULT_USER_SETTINGS,
           isHydrated: true
         });
       } catch (error) {
@@ -46,16 +50,17 @@ export const useStore = create<State>()(
       }
     },
     reset: () => {
-      set({ 
-        days: {}, 
-        presets: DEFAULT_PRESETS, 
-        isHydrated: false 
+      set({
+        days: {},
+        presets: DEFAULT_PRESETS,
+        settings: DEFAULT_USER_SETTINGS,
+        isHydrated: false
       });
     },
     upsertDay: async (entry: DayEntry) => {
       const user = auth.currentUser;
       if (!user) return;
-      
+
       const next = { ...get().days, [entry.date]: entry };
       set({ days: next });
       await saveUserData(user.uid, 'days', next);
@@ -63,11 +68,19 @@ export const useStore = create<State>()(
     updatePresets: async (updater: (p: Presets) => Presets) => {
       const user = auth.currentUser;
       if (!user) return;
-      
+
       const next = updater(get().presets);
       set({ presets: next });
       await saveUserData(user.uid, 'presets', next);
-    }
+    },
+    updateSettings: async (updater: (s: UserSettings) => UserSettings) => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const next = updater(get().settings);
+      set({ settings: next });
+      await saveUserData(user.uid, 'settings', next);
+    },
   })
 );
 
@@ -102,9 +115,8 @@ function migrateEntry(raw: any): DayEntry {
         : null,
     injection: raw?.injection ?? null,
     notes: typeof raw?.notes === 'string' ? raw.notes : undefined,
+    customValues: raw?.customValues ?? {},
   };
   entry.meals.snacks = legacyMeals;
   return entry;
 }
-
-

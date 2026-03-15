@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '@/store';
-import { DayEntry, MealType } from '@/types';
+import { DayEntry, MealType, WATER_UNIT_CONFIGS } from '@/types';
 import { addDaysISO, isTuesdayOrWednesdayISO, todayISO, toFormattedDate } from '@/utils/date';
 import { FancySlider } from '@/ui/FancySlider';
 import { AnimatedConfettiCheck } from '@/ui/AnimatedConfettiCheck';
+import { CATALOG_BY_ID } from '@/data/trackedItemCatalog';
 
 const moodLabels = ['😕', '😐', '🙂', '😊', '🌟'];
 const healthLabels = ['Rough', 'Meh', 'OK', 'Good', 'Great'];
@@ -13,6 +14,7 @@ export function Home() {
   const isHydrated = useStore((s) => s.isHydrated);
   const days = useStore((s) => s.days);
   const presets = useStore((s) => s.presets);
+  const settings = useStore((s) => s.settings);
   const upsertDay = useStore((s) => s.upsertDay);
   const updatePresets = useStore((s) => s.updatePresets);
 
@@ -28,7 +30,8 @@ export function Home() {
         physical_health: 3,
         workouts: null,
         injection: null,
-        notes: ''
+        notes: '',
+        customValues: {},
       },
     [days, date]
   );
@@ -60,7 +63,6 @@ export function Home() {
   };
   const SNACK_DEFAULTS = ['PB crackers', 'Cheddies', 'Nuts'];
 
-  // Convert text to sentence case (first letter capitalized, rest lowercase)
   function toSentenceCase(text: string): string {
     if (!text) return text;
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
@@ -79,7 +81,7 @@ export function Home() {
   }
 
   function popularChipsForMeal(meal: 'breakfast' | 'lunch' | 'dinner'): string[] {
-    const windowDays = lastNDatesISO(21); // last ~3 weeks
+    const windowDays = lastNDatesISO(21);
     const counts = new Map<string, number>();
     for (const [dateKey, e] of Object.entries(days)) {
       if (!windowDays.has(dateKey)) continue;
@@ -143,6 +145,29 @@ export function Home() {
     const next = { ...entry, [key]: value } as DayEntry;
     await upsertDay(next);
   }
+
+  async function saveCustomValue(id: string, value: number | boolean | string) {
+    const next: DayEntry = {
+      ...entry,
+      customValues: { ...(entry.customValues ?? {}), [id]: value },
+    };
+    await upsertDay(next);
+  }
+
+  // Water unit config
+  const waterUnitCfg = WATER_UNIT_CONFIGS[settings.waterUnit ?? 'stanleys'];
+
+  // Which custom items to show today
+  const dateObj = new Date(date + 'T00:00:00');
+  const dow = dateObj.getDay(); // 0=Sun..6=Sat
+
+  const activeCustomItems = useMemo(() => {
+    return settings.trackedItems.filter((cfg) => {
+      if (!cfg.isEnabled) return false;
+      if (cfg.scheduleDays === null) return true;
+      return cfg.scheduleDays.includes(dow);
+    });
+  }, [settings.trackedItems, dow]);
 
   return (
     <div className="space-y-4">
@@ -234,9 +259,9 @@ export function Home() {
                 value={snackInputs.breakfast}
                 placeholder="Add breakfast snack..."
                 onChange={(e) => setSnackInputs((s) => ({ ...s, breakfast: e.target.value }))}
-                onKeyDown={(e) => { if (e.key === 'Enter') { const val = snackInputs.breakfast.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), breakfast: [...(entry.snacksByMeal?.breakfast ?? []), sentenceCaseVal] }); setSnackInputs((s)=>({ ...s, breakfast: '' })); } } }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { const val = snackInputs.breakfast.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), breakfast: [...(entry.snacksByMeal?.breakfast ?? []), sentenceCaseVal] }); setSnackInputs((s) => ({ ...s, breakfast: '' })); } } }}
               />
-              <button className="btn bg-lilac/60 hover:bg-lilac" onClick={() => { const val = snackInputs.breakfast.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), breakfast: [...(entry.snacksByMeal?.breakfast ?? []), sentenceCaseVal] }); setSnackInputs((s)=>({ ...s, breakfast: '' })); } }}>Add</button>
+              <button className="btn bg-lilac/60 hover:bg-lilac" onClick={() => { const val = snackInputs.breakfast.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), breakfast: [...(entry.snacksByMeal?.breakfast ?? []), sentenceCaseVal] }); setSnackInputs((s) => ({ ...s, breakfast: '' })); } }}>Add</button>
             </div>
             <div className="mt-2 flex gap-2 overflow-x-auto flex-nowrap">
               {chipsSnackBreakfast.map((s) => (
@@ -255,8 +280,6 @@ export function Home() {
             )}
           </div>
         </section>
-
-        
 
         {/* Lunch */}
         <section className="card p-4 space-y-3">
@@ -296,9 +319,9 @@ export function Home() {
                 value={snackInputs.lunch}
                 placeholder="Add lunch snack..."
                 onChange={(e) => setSnackInputs((s) => ({ ...s, lunch: e.target.value }))}
-                onKeyDown={(e) => { if (e.key === 'Enter') { const val = snackInputs.lunch.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), lunch: [...(entry.snacksByMeal?.lunch ?? []), sentenceCaseVal] }); setSnackInputs((s)=>({ ...s, lunch: '' })); } } }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { const val = snackInputs.lunch.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), lunch: [...(entry.snacksByMeal?.lunch ?? []), sentenceCaseVal] }); setSnackInputs((s) => ({ ...s, lunch: '' })); } } }}
               />
-              <button className="btn bg-lilac/60 hover:bg-lilac" onClick={() => { const val = snackInputs.lunch.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), lunch: [...(entry.snacksByMeal?.lunch ?? []), sentenceCaseVal] }); setSnackInputs((s)=>({ ...s, lunch: '' })); } }}>Add</button>
+              <button className="btn bg-lilac/60 hover:bg-lilac" onClick={() => { const val = snackInputs.lunch.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), lunch: [...(entry.snacksByMeal?.lunch ?? []), sentenceCaseVal] }); setSnackInputs((s) => ({ ...s, lunch: '' })); } }}>Add</button>
             </div>
             <div className="mt-2 flex gap-2 overflow-x-auto flex-nowrap">
               {chipsSnackLunch.map((s) => (
@@ -317,8 +340,6 @@ export function Home() {
             )}
           </div>
         </section>
-
-        
 
         {/* Dinner */}
         <section className="card p-4 space-y-3">
@@ -358,9 +379,9 @@ export function Home() {
                 value={snackInputs.dinner}
                 placeholder="Add dinner snack..."
                 onChange={(e) => setSnackInputs((s) => ({ ...s, dinner: e.target.value }))}
-                onKeyDown={(e) => { if (e.key === 'Enter') { const val = snackInputs.dinner.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), dinner: [...(entry.snacksByMeal?.dinner ?? []), sentenceCaseVal] }); setSnackInputs((s)=>({ ...s, dinner: '' })); } } }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { const val = snackInputs.dinner.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), dinner: [...(entry.snacksByMeal?.dinner ?? []), sentenceCaseVal] }); setSnackInputs((s) => ({ ...s, dinner: '' })); } } }}
               />
-              <button className="btn bg-lilac/60 hover:bg-lilac" onClick={() => { const val = snackInputs.dinner.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), dinner: [...(entry.snacksByMeal?.dinner ?? []), sentenceCaseVal] }); setSnackInputs((s)=>({ ...s, dinner: '' })); } }}>Add</button>
+              <button className="btn bg-lilac/60 hover:bg-lilac" onClick={() => { const val = snackInputs.dinner.trim(); if (val) { const sentenceCaseVal = toSentenceCase(val); saveField('snacksByMeal', { ...(entry.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] }), dinner: [...(entry.snacksByMeal?.dinner ?? []), sentenceCaseVal] }); setSnackInputs((s) => ({ ...s, dinner: '' })); } }}>Add</button>
             </div>
             <div className="mt-2 flex gap-2 overflow-x-auto flex-nowrap">
               {chipsSnackDinner.map((s) => (
@@ -379,8 +400,6 @@ export function Home() {
             )}
           </div>
         </section>
-
-        
       </section>
 
       <section className="space-y-3">
@@ -417,17 +436,20 @@ export function Home() {
             />
           </div>
           <div>
-            <div className="section-title">Water (Stanleys)</div>
+            <div className="section-title">Water ({waterUnitCfg.shortLabel})</div>
             <FancySlider
               min={0}
-              max={8}
+              max={waterUnitCfg.max}
+              step={waterUnitCfg.step}
               value={entry.water_stanleys}
               onChange={(v) => saveField('water_stanleys', v)}
-              labels={Array.from({ length: 9 }, (_, i) => String(i))}
-              ariaLabel="Water Stanleys"
+              labels={settings.waterUnit === 'stanleys' ? Array.from({ length: 9 }, (_, i) => String(i)) : undefined}
+              ariaLabel="Water"
               color="#34d399"
             />
-            <div className="text-sm text-slate-600">{entry.water_stanleys} × 40 oz</div>
+            <div className="text-sm text-slate-600">
+              {entry.water_stanleys} {waterUnitCfg.displaySuffix}
+            </div>
             <div className="mt-3">
               <div className="section-title">Went to bathroom</div>
               <div className="flex flex-col space-y-2 pb-2">
@@ -486,6 +508,82 @@ export function Home() {
         </div>
       </section>
 
+      {/* ── Custom tracked items ─────────────────────────────────────────────── */}
+      {activeCustomItems.length > 0 && (
+        <section className="space-y-3">
+          <div className="text-slate-700 font-display font-semibold">Today's Health Items</div>
+          <div className="card p-4 grid grid-cols-1 gap-4">
+            {activeCustomItems.map((cfg) => {
+              const catalogItem = cfg.isCustom ? null : CATALOG_BY_ID[cfg.id];
+              const label = cfg.isCustom ? cfg.label! : catalogItem?.label ?? cfg.id;
+              const icon = catalogItem?.icon ?? '📋';
+              const inputType = cfg.isCustom ? cfg.inputType! : catalogItem?.inputType ?? 'checkbox';
+              const unit = cfg.isCustom ? cfg.unit : catalogItem?.unit;
+              const min = cfg.isCustom ? (cfg.min ?? 0) : (catalogItem?.min ?? 0);
+              const max = cfg.isCustom ? (cfg.max ?? 5) : (catalogItem?.max ?? 5);
+              const step = cfg.isCustom ? (cfg.step ?? 1) : (catalogItem?.step ?? 1);
+              const currentVal = entry.customValues?.[cfg.id];
+
+              return (
+                <div key={cfg.id}>
+                  <div className="section-title flex items-center gap-1">
+                    <span>{icon}</span> {label}{unit ? ` (${unit})` : ''}
+                  </div>
+                  {inputType === 'checkbox' && (
+                    <AnimatedConfettiCheck
+                      checked={!!currentVal}
+                      onChange={(checked) => saveCustomValue(cfg.id, checked)}
+                      label={currentVal ? 'Done' : 'Mark done'}
+                    />
+                  )}
+                  {inputType === 'number' && (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        className="input w-32"
+                        min={min}
+                        max={max}
+                        step={step}
+                        value={typeof currentVal === 'number' ? currentVal : ''}
+                        placeholder={`0${unit ? ' ' + unit : ''}`}
+                        onChange={(e) => {
+                          const v = e.target.value ? Number(e.target.value) : '';
+                          if (v !== '') saveCustomValue(cfg.id, v as number);
+                        }}
+                      />
+                      {unit && <span className="text-sm text-slate-500">{unit}</span>}
+                    </div>
+                  )}
+                  {inputType === 'slider' && (
+                    <>
+                      <FancySlider
+                        min={min}
+                        max={max}
+                        step={step}
+                        value={typeof currentVal === 'number' ? currentVal : min}
+                        onChange={(v) => saveCustomValue(cfg.id, v)}
+                        ariaLabel={label}
+                        color="#7C4DFF"
+                      />
+                      <div className="text-sm text-slate-600">{typeof currentVal === 'number' ? currentVal : min} / {max}</div>
+                    </>
+                  )}
+                  {inputType === 'text' && (
+                    <input
+                      type="text"
+                      className="input"
+                      value={typeof currentVal === 'string' ? currentVal : ''}
+                      placeholder={unit ? `e.g., 120/80 ${unit}` : 'Enter value...'}
+                      onChange={(e) => saveCustomValue(cfg.id, e.target.value)}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <section className="card p-4 grid grid-cols-1 gap-3">
         <div>
           <button
@@ -531,5 +629,3 @@ export function Home() {
     </div>
   );
 }
-
-

@@ -37,9 +37,10 @@ export function AppShell() {
           <nav className="flex gap-2 items-center">
             <NavLink to="/" className={({ isActive }) => `btn ${isActive && location.pathname === '/' ? 'btn-primary' : ''}`}>Home</NavLink>
             <NavLink to="/dashboard" className={({ isActive }) => `btn ${isActive ? 'btn-primary' : ''}`}>Dashboard</NavLink>
+            <NavLink to="/settings" className={({ isActive }) => `btn ${isActive ? 'btn-primary' : ''}`}>Settings</NavLink>
             {user && (
-              <button 
-                className="btn bg-lilac/60 hover:bg-lilac" 
+              <button
+                className="btn bg-lilac/60 hover:bg-lilac"
                 onClick={() => signOut(getAuth())}
               >
                 Sign Out
