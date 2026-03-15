@@ -59,13 +59,15 @@ export async function getUserData(uid: string): Promise<Record<string, any>> {
       data.days = docData.data;
     } else if (docData.dataType === 'presets') {
       data.presets = docData.data;
+    } else if (docData.dataType === 'settings') {
+      data.settings = docData.data;
     }
   });
   
   return data;
 }
 
-export async function saveUserData(uid: string, dataType: 'days' | 'presets', data: any): Promise<void> {
+export async function saveUserData(uid: string, dataType: 'days' | 'presets' | 'settings', data: any): Promise<void> {
   const docRef = doc(db, 'userData', `${uid}_${dataType}`);
   await setDoc(docRef, {
     uid,

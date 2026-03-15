@@ -4,7 +4,7 @@ import { useStore } from '@/store';
 describe('store', () => {
   beforeEach(() => {
     // reset store between tests
-    useStore.setState({ days: {}, presets: { workouts: [], quickMeals: [] } });
+    useStore.setState({ days: {}, presets: { workouts: [], quickMeals: [], mealPresets: { breakfast: [], lunch: [], dinner: [], snacks: [] } } });
   });
 
   it('upserts a day and persists shape', async () => {

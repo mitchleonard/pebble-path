@@ -5,6 +5,7 @@ import './styles.css';
 import { AppShell } from './ui/AppShell';
 import { Home } from './screens/Home';
 import { Dashboard } from './screens/Dashboard';
+import { Settings } from './screens/Settings';
 import { Welcome } from './screens/Welcome';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: 'dashboard', element: <Dashboard /> },
+      { path: 'settings', element: <Settings /> },
     ],
   },
   { path: '/welcome', element: <Welcome /> },
