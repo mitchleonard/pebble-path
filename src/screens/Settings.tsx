@@ -331,9 +331,79 @@ export function Settings() {
         </div>
       </section>
 
+      {/* ── Meal & snack presets ────────────────────────────────────────────── */}
+      <MealPresets />
+
       {/* ── Workout presets ─────────────────────────────────────────────────── */}
       <WorkoutPresets />
     </div>
+  );
+}
+
+type MealKey = 'breakfast' | 'lunch' | 'dinner' | 'snacks';
+const MEAL_ICONS: Record<MealKey, string> = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snacks: '🍎' };
+const MEAL_LABELS: Record<MealKey, string> = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snacks: 'Snacks' };
+
+function MealPresets() {
+  const presets = useStore((s) => s.presets);
+  const updatePresets = useStore((s) => s.updatePresets);
+  const [inputs, setInputs] = useState<Record<MealKey, string>>({ breakfast: '', lunch: '', dinner: '', snacks: '' });
+  const [saved, setSaved] = useState(false);
+
+  async function addItem(meal: MealKey) {
+    const label = inputs[meal].trim();
+    if (!label) return;
+    const existing = presets.mealPresets?.[meal] ?? [];
+    if (existing.includes(label)) { setInputs((s) => ({ ...s, [meal]: '' })); return; }
+    await updatePresets((p) => ({ ...p, mealPresets: { ...(p.mealPresets ?? {}), [meal]: [...existing, label] } }));
+    setInputs((s) => ({ ...s, [meal]: '' }));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  }
+
+  async function removeItem(meal: MealKey, item: string) {
+    const existing = presets.mealPresets?.[meal] ?? [];
+    await updatePresets((p) => ({ ...p, mealPresets: { ...(p.mealPresets ?? {}), [meal]: existing.filter((x) => x !== item) } }));
+  }
+
+  return (
+    <section className="card p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="section-title">Meal &amp; Snack Presets</div>
+        {saved && <span className="text-sm text-emerald-600 font-medium">Saved ✓</span>}
+      </div>
+      <p className="text-sm text-slate-500">
+        Set your go-to meals and snacks. These show as quick-add chips and blend with your recent choices as you log more entries.
+      </p>
+      {(['breakfast', 'lunch', 'dinner', 'snacks'] as MealKey[]).map((meal) => {
+        const items = presets.mealPresets?.[meal] ?? [];
+        return (
+          <div key={meal} className="space-y-2 pt-3 border-t border-slate-100 first:border-0 first:pt-0">
+            <div className="text-sm font-semibold text-slate-700">{MEAL_ICONS[meal]} {MEAL_LABELS[meal]}</div>
+            {items.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {items.map((item) => (
+                  <span key={item} className="inline-flex items-center gap-1 rounded-xl bg-peach/60 px-3 py-1 text-sm">
+                    {item}
+                    <button className="text-slate-500 hover:text-red-500 ml-1" onClick={() => removeItem(meal, item)}>×</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <input
+                className="input flex-1"
+                placeholder={`Add ${MEAL_LABELS[meal].toLowerCase()} item...`}
+                value={inputs[meal]}
+                onChange={(e) => setInputs((s) => ({ ...s, [meal]: e.target.value }))}
+                onKeyDown={(e) => { if (e.key === 'Enter') addItem(meal); }}
+              />
+              <button className="btn btn-primary" onClick={() => addItem(meal)} disabled={!inputs[meal].trim()}>Add</button>
+            </div>
+          </div>
+        );
+      })}
+    </section>
   );
 }
 

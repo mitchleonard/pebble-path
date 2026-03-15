@@ -46,6 +46,7 @@ export function Home() {
   });
   const [snackInputs, setSnackInputs] = useState({ breakfast: '', lunch: '', dinner: '' });
 
+  // Fallback defaults used only if mealPresets is empty
   const MEAL_DEFAULTS: Record<'breakfast' | 'lunch' | 'dinner', string[]> = {
     breakfast: ['Protein shake', 'Protein smoothie', 'Egg bites', 'Bagel with cream cheese'],
     lunch: ['Salad', 'Lunchable'],
@@ -69,6 +70,7 @@ export function Home() {
     return set;
   }
 
+  // Chips: recent usage (sorted by frequency) first, then fill from user's configured meal presets
   function popularChipsForMeal(meal: 'breakfast' | 'lunch' | 'dinner'): string[] {
     const windowDays = lastNDatesISO(21);
     const counts = new Map<string, number>();
@@ -76,8 +78,11 @@ export function Home() {
       if (!windowDays.has(dk)) continue;
       for (const item of e.meals?.[meal] ?? []) counts.set(item, (counts.get(item) ?? 0) + 1);
     }
-    const ranked = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).map(([k]) => k);
-    return (ranked.length >= 3 ? ranked : MEAL_DEFAULTS[meal]).slice(0, 8);
+    const recentRanked = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).map(([k]) => k);
+    const userPresets = presets.mealPresets?.[meal] ?? MEAL_DEFAULTS[meal];
+    const recentSet = new Set(recentRanked);
+    const extras = userPresets.filter((p) => !recentSet.has(p));
+    return [...recentRanked, ...extras].slice(0, 8);
   }
 
   function popularChipsForSnack(meal: 'breakfast' | 'lunch' | 'dinner'): string[] {
@@ -87,8 +92,11 @@ export function Home() {
       if (!windowDays.has(dk)) continue;
       for (const item of e.snacksByMeal?.[meal] ?? []) counts.set(item, (counts.get(item) ?? 0) + 1);
     }
-    const ranked = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).map(([k]) => k);
-    return (ranked.length >= 2 ? ranked : SNACK_DEFAULTS).slice(0, 8);
+    const recentRanked = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).map(([k]) => k);
+    const userSnackPresets = presets.mealPresets?.snacks ?? SNACK_DEFAULTS;
+    const recentSet = new Set(recentRanked);
+    const extras = userSnackPresets.filter((p) => !recentSet.has(p));
+    return [...recentRanked, ...extras].slice(0, 8);
   }
 
   const chipsBreakfast = useMemo(() => popularChipsForMeal('breakfast'), [days]);
@@ -149,8 +157,13 @@ export function Home() {
     [activeItems]
   );
 
+  // Weight and injection render inline in the health card — not in the generic block
+  const activeWeightItem = useMemo(() => activeItems.find((c) => c.id === 'weight'), [activeItems]);
+  const activeInjectionItem = useMemo(() => activeItems.find((c) => c.id === 'injection'), [activeItems]);
+
   const trackingItems = useMemo(() =>
     activeItems.filter((cfg) => {
+      if (cfg.id === 'weight' || cfg.id === 'injection') return false;
       const catalogItem = cfg.isCustom ? null : CATALOG_BY_ID[cfg.id];
       return cfg.isCustom || !catalogItem || !FEELINGS_ITEM_IDS.has(cfg.id);
     }),
@@ -544,7 +557,44 @@ export function Home() {
             />
           </div>
 
-          {/* Tracking items that aren't feelings (vitals, body, medication, lifestyle) */}
+          {/* Weight — shown when scheduled for today */}
+          {activeWeightItem && (
+            <div>
+              <div className="section-title">⚖️ Weight (lbs)</div>
+              <input
+                type="number"
+                className="input w-36"
+                min={50}
+                max={600}
+                step={0.1}
+                value={entry.weight ?? ''}
+                placeholder="e.g., 165"
+                onChange={(e) => saveField('weight', e.target.value ? Number(e.target.value) : undefined)}
+              />
+            </div>
+          )}
+
+          {/* Injection — shown when scheduled for today */}
+          {activeInjectionItem && (
+            <div className="space-y-2">
+              <div className="section-title">💉 Injection</div>
+              <AnimatedConfettiCheck
+                checked={!!entry.injection?.done}
+                onChange={(checked) => saveField('injection', { done: checked, note: entry.injection?.note })}
+                label="Done"
+                emoji="💉"
+                variant="confetti"
+              />
+              <input
+                className="input"
+                placeholder="Optional note (e.g., left thigh)"
+                value={entry.injection?.note ?? ''}
+                onChange={(e) => saveField('injection', { done: !!entry.injection?.done, note: e.target.value })}
+              />
+            </div>
+          )}
+
+          {/* Other tracking items (vitals, body measurements, medication, lifestyle) */}
           {trackingItems.length > 0 && (
             <div className="pt-2 border-t border-slate-100 space-y-4">
               {trackingItems.map((cfg) => renderItemInput(cfg))}

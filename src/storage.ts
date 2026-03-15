@@ -36,7 +36,13 @@ export async function loadPresets(): Promise<Presets> {
   return (
     data ?? {
       workouts: ['OTF', 'OTF Strength', 'Pickleball', 'Yoga', 'Walk', 'Other'],
-      quickMeals: ['Smoothie', 'Protein shake', 'Salad', 'PB crackers', 'Nuts', 'Cheddies'],
+      quickMeals: [],
+      mealPresets: {
+        breakfast: ['Protein shake', 'Egg bites', 'Oatmeal'],
+        lunch: ['Salad', 'Sandwich', 'Leftovers'],
+        dinner: ['Wraps', 'Pizza', 'Chicken & veggies'],
+        snacks: ['PB crackers', 'Nuts', 'Fruit'],
+      },
     }
   );
 }

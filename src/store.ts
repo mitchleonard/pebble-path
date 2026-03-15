@@ -3,10 +3,18 @@ import { DayEntry, Presets, MealType, UserSettings, DEFAULT_USER_SETTINGS, Track
 import { getUserData, saveUserData } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
 
+const DEFAULT_MEAL_PRESETS = {
+  breakfast: ['Protein shake', 'Protein smoothie', 'Egg bites', 'Bagel with cream cheese', 'Oatmeal', 'Yogurt parfait'],
+  lunch: ['Salad', 'Lunchable', 'Sandwich', 'Leftovers', 'Soup'],
+  dinner: ['Wraps', 'Pizza', 'Chicken & veggies', 'Pasta', 'Stir fry'],
+  snacks: ['PB crackers', 'Cheddies', 'Nuts', 'Fruit', 'Protein bar', 'Smoothie'],
+};
+
 // Default presets for when user is not authenticated
 const DEFAULT_PRESETS: Presets = {
   workouts: ['OTF', 'OTF Strength', 'Pickleball', 'Yoga', 'Walk', 'Other'],
-  quickMeals: ['Smoothie', 'Protein shake', 'Salad', 'PB crackers', 'Nuts', 'Cheddies'],
+  quickMeals: [],
+  mealPresets: DEFAULT_MEAL_PRESETS,
 };
 
 type State = {
@@ -42,9 +50,13 @@ export const useStore = create<State>()(
         const rawSettings: UserSettings = data.settings
           ? { ...DEFAULT_USER_SETTINGS, ...data.settings }
           : DEFAULT_USER_SETTINGS;
+        const rawPresets: Presets = data.presets || DEFAULT_PRESETS;
+        const migratedPresets: Presets = rawPresets.mealPresets
+          ? rawPresets
+          : { ...rawPresets, mealPresets: DEFAULT_MEAL_PRESETS };
         set({
           days: migrated,
-          presets: data.presets || DEFAULT_PRESETS,
+          presets: migratedPresets,
           settings: ensureLegacyItems(rawSettings),
           isHydrated: true
         });

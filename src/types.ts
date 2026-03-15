@@ -16,9 +16,17 @@ export type DayEntry = {
   customValues?: Record<string, number | boolean | string>;
 };
 
+export type MealPresets = {
+  breakfast: string[];
+  lunch: string[];
+  dinner: string[];
+  snacks: string[];
+};
+
 export type Presets = {
   workouts: string[];
-  quickMeals: string[]; // global quick-add chips that grow over time
+  quickMeals: string[]; // legacy global chips (kept for backward compat)
+  mealPresets: MealPresets; // per-meal curated presets, user-configurable
 };
 
 // ─── Water unit configuration ────────────────────────────────────────────────
