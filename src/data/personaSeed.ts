@@ -10,6 +10,8 @@
 
 import { DayEntry, Presets, UserSettings } from '@/types';
 
+export type BulkSetDays = (entries: DayEntry[]) => Promise<void>;
+
 // ── Custom item IDs ───────────────────────────────────────────────────────────
 export const CUSTOM_COLD_PLUNGE_ID = 'custom_1737000001';
 export const CUSTOM_CREATINE_ID    = 'custom_1737000002';
@@ -746,7 +748,7 @@ function getInjection(date: Date): { done: boolean; note?: string } | null {
 
 // ── Main seed function ────────────────────────────────────────────────────────
 export async function seedJordanPersona(
-  upsertDay:      (entry: DayEntry) => Promise<void>,
+  bulkSetDays:    (entries: DayEntry[]) => Promise<void>,
   updateSettings: (updater: (s: UserSettings) => UserSettings) => Promise<void>,
   updatePresets:  (updater: (p: Presets) => Presets) => Promise<void>,
 ): Promise<void> {
@@ -756,9 +758,11 @@ export async function seedJordanPersona(
   // 2. Apply Jordan's presets
   await updatePresets(() => JORDAN_PRESETS);
 
-  // 3. Seed all day entries
+  // 3. Build all day entries in memory, then do a single write
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const entries: DayEntry[] = [];
 
   for (const spec of RAW_DAYS) {
     if (spec.skip) continue;
@@ -767,20 +771,20 @@ export async function seedJordanPersona(
     d.setDate(d.getDate() - spec.offset);
     const date = d.toISOString().slice(0, 10);
 
-    const weight   = getWeight(d);
+    const weight    = getWeight(d);
     const injection = getInjection(d);
 
     const customValues: Record<string, number | boolean | string> = {};
-    if (spec.sleep   !== undefined) customValues['sleep_hours']   = spec.sleep;
-    if (spec.steps   !== undefined) customValues['steps']         = spec.steps;
-    if (spec.energy  !== undefined) customValues['energy_level']  = spec.energy;
-    if (spec.stress  !== undefined) customValues['stress_level']  = spec.stress;
-    if (spec.med_am  !== undefined) customValues['med_am']        = spec.med_am;
-    if (spec.vitamins !== undefined) customValues['vitamins']     = spec.vitamins;
-    if (spec.coldPlunge !== undefined) customValues[CUSTOM_COLD_PLUNGE_ID] = spec.coldPlunge;
-    if (spec.creatine   !== undefined) customValues[CUSTOM_CREATINE_ID]    = spec.creatine;
+    if (spec.sleep      !== undefined) customValues['sleep_hours']          = spec.sleep;
+    if (spec.steps      !== undefined) customValues['steps']                = spec.steps;
+    if (spec.energy     !== undefined) customValues['energy_level']         = spec.energy;
+    if (spec.stress     !== undefined) customValues['stress_level']         = spec.stress;
+    if (spec.med_am     !== undefined) customValues['med_am']               = spec.med_am;
+    if (spec.vitamins   !== undefined) customValues['vitamins']             = spec.vitamins;
+    if (spec.coldPlunge !== undefined) customValues[CUSTOM_COLD_PLUNGE_ID]  = spec.coldPlunge;
+    if (spec.creatine   !== undefined) customValues[CUSTOM_CREATINE_ID]     = spec.creatine;
 
-    await upsertDay({
+    entries.push({
       date,
       weight,
       meals: {
@@ -791,13 +795,16 @@ export async function seedJordanPersona(
       },
       snacksByMeal: spec.snacksByMeal ?? { breakfast: [], lunch: [], dinner: [] },
       water_stanleys: spec.water,
-      bathroom: spec.bathroom ?? false,
+      bathroom:        spec.bathroom ?? false,
       mood:            spec.mood,
       physical_health: spec.physical,
-      workouts:  spec.workouts ?? null,
+      workouts:        spec.workouts ?? null,
       injection,
       notes: spec.notes ?? '',
       customValues,
     });
   }
+
+  // Single Firestore write for all 53 days
+  await bulkSetDays(entries);
 }

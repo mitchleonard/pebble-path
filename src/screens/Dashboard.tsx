@@ -140,6 +140,7 @@ export function Dashboard() {
   }, [enabledItems, entries]);
 
   const [showCount, setShowCount] = useState<number>(4);
+  const bulkSetDays    = useStore((s) => s.bulkSetDays);
   const updateSettings = useStore((s) => s.updateSettings);
   const updatePresets  = useStore((s) => s.updatePresets);
   const [seeding, setSeeding] = useState(false);
@@ -147,7 +148,7 @@ export function Dashboard() {
   async function seedJordan() {
     setSeeding(true);
     try {
-      await seedJordanPersona(upsertDay, updateSettings, updatePresets);
+      await seedJordanPersona(bulkSetDays, updateSettings, updatePresets);
     } finally {
       setSeeding(false);
     }

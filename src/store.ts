@@ -25,6 +25,7 @@ type State = {
   hydrate: () => Promise<void>;
   reset: () => void;
   upsertDay: (entry: DayEntry) => Promise<void>;
+  bulkSetDays: (entries: DayEntry[]) => Promise<void>;
   updatePresets: (updater: (p: Presets) => Presets) => Promise<void>;
   updateSettings: (updater: (s: UserSettings) => UserSettings) => Promise<void>;
 };
@@ -77,6 +78,17 @@ export const useStore = create<State>()(
       if (!user) return;
 
       const next = { ...get().days, [entry.date]: entry };
+      set({ days: next });
+      await saveUserData(user.uid, 'days', next);
+    },
+    bulkSetDays: async (entries: DayEntry[]) => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const next = { ...get().days };
+      for (const entry of entries) {
+        next[entry.date] = entry;
+      }
       set({ days: next });
       await saveUserData(user.uid, 'days', next);
     },
