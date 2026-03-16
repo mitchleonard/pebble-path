@@ -6,6 +6,7 @@ import * as XLSX from 'xlsx';
 import { SimpleLineChart, SimpleBarChart } from '@/ui/SimpleCharts';
 import { AIInsights } from '@/ui/AIInsights';
 import { CATALOG_BY_ID } from '@/data/trackedItemCatalog';
+import { seedJordanPersona } from '@/data/personaSeed';
 
 function Insight({ title, value }: { title: string; value: string }) {
   return (
@@ -139,6 +140,18 @@ export function Dashboard() {
   }, [enabledItems, entries]);
 
   const [showCount, setShowCount] = useState<number>(4);
+  const updateSettings = useStore((s) => s.updateSettings);
+  const updatePresets  = useStore((s) => s.updatePresets);
+  const [seeding, setSeeding] = useState(false);
+
+  async function seedJordan() {
+    setSeeding(true);
+    try {
+      await seedJordanPersona(upsertDay, updateSettings, updatePresets);
+    } finally {
+      setSeeding(false);
+    }
+  }
 
   async function seedDemoData() {
     const today = new Date();
@@ -455,9 +468,16 @@ export function Dashboard() {
         </section>
       )}
 
-      <section className="card p-4">
+      <section className="card p-4 space-y-2">
         <button className="btn bg-slate-100 hover:bg-lilac/60 text-xs" onClick={seedDemoData}>
           Seed 21 days of demo data
+        </button>
+        <button
+          className="btn bg-lilac/20 hover:bg-lilac/60 text-xs w-full"
+          onClick={seedJordan}
+          disabled={seeding}
+        >
+          {seeding ? "Seeding Jordan\u2019s 60-day journey\u2026" : "\uD83C\uDF1F Seed Jordan\u2019s 60-day persona (case study)"}
         </button>
       </section>
     </div>
